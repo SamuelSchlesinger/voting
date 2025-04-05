@@ -442,11 +442,53 @@ impl Pseudonym {
     }
 }
 
-#[test]
-fn test() {
-    // Test the core pseudonym functionality with 10 iterations
-    for _ in 0..10 {
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use bls12_381::G1Projective;
+
+    #[test]
+    fn test_pseudonym_e2e() {
+        // Test the core pseudonym functionality with 10 iterations
+        for _ in 0..10 {
+            use rand_core::OsRng;
+            let params = Params::default();
+            let issuer_private_key = IssuerPrivateKey::random(OsRng);
+            let client_private_key = ClientPrivateKey::random(OsRng);
+            
+            // Complete credential issuance protocol
+            let credreq = client_private_key.request(&params, OsRng);
+            let credresp = credreq
+                .respond(&issuer_private_key, &params, OsRng)
+                .unwrap();
+            let cred1 = client_private_key
+                .create_credential(&credreq, &credresp, &issuer_private_key.public())
+                .unwrap();
+                
+            // Verify credential
+            assert!(bool::from(
+                cred1.verify(&params, &issuer_private_key.public())
+            ));
+            
+            // Create and verify pseudonym
+            let relying_party_id = Scalar::random(OsRng);
+            let pseudonym1 = cred1
+                .pseudonym_for(&params, relying_party_id, b"nonce", OsRng)
+                .unwrap();
+            assert!(bool::from(pseudonym1.verify(
+                &params,
+                &issuer_private_key.public(),
+                b"nonce"
+            )));
+            assert_eq!(pseudonym1.relying_party_id(), &relying_party_id);
+        }
+    }
+
+    #[test]
+    fn test_pseudonym_tampering_fails_verification() {
         use rand_core::OsRng;
+        
+        // Set up test environment
         let params = Params::default();
         let issuer_private_key = IssuerPrivateKey::random(OsRng);
         let client_private_key = ClientPrivateKey::random(OsRng);
@@ -456,25 +498,197 @@ fn test() {
         let credresp = credreq
             .respond(&issuer_private_key, &params, OsRng)
             .unwrap();
-        let cred1 = client_private_key
+        let credential = client_private_key
             .create_credential(&credreq, &credresp, &issuer_private_key.public())
             .unwrap();
             
-        // Verify credential
-        assert!(bool::from(
-            cred1.verify(&params, &issuer_private_key.public())
-        ));
-        
-        // Create and verify pseudonym
+        // Create valid pseudonym
         let relying_party_id = Scalar::random(OsRng);
-        let pseudonym1 = cred1
+        let valid_pseudonym = credential
             .pseudonym_for(&params, relying_party_id, b"nonce", OsRng)
             .unwrap();
-        assert!(bool::from(pseudonym1.verify(
+            
+        // Verify the valid pseudonym passes verification
+        assert!(bool::from(valid_pseudonym.verify(
             &params,
             &issuer_private_key.public(),
             b"nonce"
         )));
-        assert_eq!(pseudonym1.relying_party_id(), &relying_party_id);
+        
+        // Test 1: Tamper with the relying party ID
+        let mut tampered_pseudonym = valid_pseudonym.clone();
+        tampered_pseudonym.relying_party_id = Scalar::random(OsRng);
+        assert!(!bool::from(tampered_pseudonym.verify(
+            &params,
+            &issuer_private_key.public(),
+            b"nonce"
+        )));
+        
+        // Test 2: Tamper with a_prime (modified credential signature point)
+        let mut tampered_pseudonym = valid_pseudonym.clone();
+        tampered_pseudonym.a_prime = (G1Projective::from(tampered_pseudonym.a_prime) * Scalar::random(OsRng)).into();
+        assert!(!bool::from(tampered_pseudonym.verify(
+            &params,
+            &issuer_private_key.public(),
+            b"nonce"
+        )));
+        
+        // Test 3: Tamper with b_bar (commitment to voter's private key)
+        let mut tampered_pseudonym = valid_pseudonym.clone();
+        tampered_pseudonym.b_bar = (G1Projective::from(tampered_pseudonym.b_bar) * Scalar::random(OsRng)).into();
+        assert!(!bool::from(tampered_pseudonym.verify(
+            &params,
+            &issuer_private_key.public(),
+            b"nonce"
+        )));
+        
+        // Test 4: Tamper with a_bar (proof component for credential validity)
+        let mut tampered_pseudonym = valid_pseudonym.clone();
+        tampered_pseudonym.a_bar = (G1Projective::from(tampered_pseudonym.a_bar) * Scalar::random(OsRng)).into();
+        assert!(!bool::from(tampered_pseudonym.verify(
+            &params,
+            &issuer_private_key.public(),
+            b"nonce"
+        )));
+        
+        // Test 5: Tamper with y (the actual pseudonym identifier)
+        let mut tampered_pseudonym = valid_pseudonym.clone();
+        tampered_pseudonym.y = (G1Projective::from(tampered_pseudonym.y) * Scalar::random(OsRng)).into();
+        assert!(!bool::from(tampered_pseudonym.verify(
+            &params,
+            &issuer_private_key.public(),
+            b"nonce"
+        )));
+        
+        // Test 6: Tamper with gamma (challenge value in the zero-knowledge proof)
+        let mut tampered_pseudonym = valid_pseudonym.clone();
+        tampered_pseudonym.gamma = Scalar::random(OsRng);
+        assert!(!bool::from(tampered_pseudonym.verify(
+            &params,
+            &issuer_private_key.public(),
+            b"nonce"
+        )));
+        
+        // Test 7: Tamper with z_e (first response value in the zero-knowledge proof)
+        let mut tampered_pseudonym = valid_pseudonym.clone();
+        tampered_pseudonym.z_e = Scalar::random(OsRng);
+        assert!(!bool::from(tampered_pseudonym.verify(
+            &params,
+            &issuer_private_key.public(),
+            b"nonce"
+        )));
+        
+        // Test 8: Tamper with z_r2 (second response value in the zero-knowledge proof)
+        let mut tampered_pseudonym = valid_pseudonym.clone();
+        tampered_pseudonym.z_r2 = Scalar::random(OsRng);
+        assert!(!bool::from(tampered_pseudonym.verify(
+            &params,
+            &issuer_private_key.public(),
+            b"nonce"
+        )));
+        
+        // Test 9: Tamper with z_r3 (third response value in the zero-knowledge proof)
+        let mut tampered_pseudonym = valid_pseudonym.clone();
+        tampered_pseudonym.z_r3 = Scalar::random(OsRng);
+        assert!(!bool::from(tampered_pseudonym.verify(
+            &params,
+            &issuer_private_key.public(),
+            b"nonce"
+        )));
+        
+        // Test 10: Tamper with z_k (fourth response value in the zero-knowledge proof)
+        let mut tampered_pseudonym = valid_pseudonym.clone();
+        tampered_pseudonym.z_k = Scalar::random(OsRng);
+        assert!(!bool::from(tampered_pseudonym.verify(
+            &params,
+            &issuer_private_key.public(),
+            b"nonce"
+        )));
+    }
+    
+    #[test]
+    fn test_pseudonym_verification_wrong_nonce() {
+        use rand_core::OsRng;
+        
+        // Set up test environment
+        let params = Params::default();
+        let issuer_private_key = IssuerPrivateKey::random(OsRng);
+        let client_private_key = ClientPrivateKey::random(OsRng);
+        
+        // Complete credential issuance protocol
+        let credreq = client_private_key.request(&params, OsRng);
+        let credresp = credreq
+            .respond(&issuer_private_key, &params, OsRng)
+            .unwrap();
+        let credential = client_private_key
+            .create_credential(&credreq, &credresp, &issuer_private_key.public())
+            .unwrap();
+            
+        // Create valid pseudonym with specific nonce
+        let relying_party_id = Scalar::random(OsRng);
+        let pseudonym = credential
+            .pseudonym_for(&params, relying_party_id, b"original_nonce", OsRng)
+            .unwrap();
+            
+        // Verify with correct nonce succeeds
+        assert!(bool::from(pseudonym.verify(
+            &params,
+            &issuer_private_key.public(),
+            b"original_nonce"
+        )));
+        
+        // Verify with wrong nonce fails
+        assert!(!bool::from(pseudonym.verify(
+            &params,
+            &issuer_private_key.public(),
+            b"different_nonce"
+        )));
+        
+        // Verify with empty nonce fails
+        assert!(!bool::from(pseudonym.verify(
+            &params,
+            &issuer_private_key.public(),
+            b""
+        )));
+    }
+    
+    #[test]
+    fn test_pseudonym_verification_wrong_issuer() {
+        use rand_core::OsRng;
+        
+        // Set up test environment with two different issuers
+        let params = Params::default();
+        let issuer_private_key1 = IssuerPrivateKey::random(OsRng);
+        let issuer_private_key2 = IssuerPrivateKey::random(OsRng);
+        let client_private_key = ClientPrivateKey::random(OsRng);
+        
+        // Complete credential issuance protocol with first issuer
+        let credreq = client_private_key.request(&params, OsRng);
+        let credresp = credreq
+            .respond(&issuer_private_key1, &params, OsRng)
+            .unwrap();
+        let credential = client_private_key
+            .create_credential(&credreq, &credresp, &issuer_private_key1.public())
+            .unwrap();
+            
+        // Create valid pseudonym
+        let relying_party_id = Scalar::random(OsRng);
+        let pseudonym = credential
+            .pseudonym_for(&params, relying_party_id, b"nonce", OsRng)
+            .unwrap();
+            
+        // Verify with correct issuer succeeds
+        assert!(bool::from(pseudonym.verify(
+            &params,
+            &issuer_private_key1.public(),
+            b"nonce"
+        )));
+        
+        // Verify with wrong issuer fails
+        assert!(!bool::from(pseudonym.verify(
+            &params,
+            &issuer_private_key2.public(),
+            b"nonce"
+        )));
     }
 }

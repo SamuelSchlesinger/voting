@@ -164,6 +164,9 @@ impl VoteDatabase {
         let nonce = vote.nonce();
         if let Some(votes_for_election) = self.votes.get_mut(&election_id) {
             if let Some(original_vote) = votes_for_election.get(&nonce) {
+                if original_vote.choice == vote.choice {
+                    return Ok(());
+                }
                 let liars_for_election = self.liars.entry(election_id).or_insert(HashMap::new());
                 let set = liars_for_election.entry(nonce).or_insert(HashMap::new());
                 set.insert(vote.choice.clone(), vote.clone());
@@ -469,6 +472,31 @@ mod tests {
             _ => panic!("Expected DoubleVote error"),
         }
         
+        assert!(db.verify(&issuer_private_key.public()));
+    }
+    
+    #[test]
+    fn test_same_choice_not_lying() {
+        let (_, issuer_private_key, credential) = setup_credentials();
+        let election_id = create_election_id();
+        let choice = "Candidate A".to_string();
+        
+        // Create two votes with the same choice
+        let vote1 = credential.vote(election_id.clone(), choice.clone()).unwrap();
+        let vote2 = credential.vote(election_id.clone(), choice.clone()).unwrap();
+        
+        let mut db = VoteDatabase::new();
+        db.enable_election(election_id);
+        
+        // First vote should succeed
+        let result1 = db.add_vote(vote1.clone(), &issuer_private_key.public());
+        assert!(result1.is_ok());
+        
+        // Second vote with same choice should also succeed (not counted as lying)
+        let result2 = db.add_vote(vote2.clone(), &issuer_private_key.public());
+        assert!(result2.is_ok());
+        
+        // Database should still validate
         assert!(db.verify(&issuer_private_key.public()));
     }
 
