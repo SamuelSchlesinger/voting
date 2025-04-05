@@ -8,8 +8,5 @@ blake3 = "1.8.1"
 bls12_381 = { version = "0.8.0", features = ["group"] }
 pairing = "0.23.0"
 rand_chacha = "0.3.1"
-rand_core = "0.6.4"
-subtle = "2.6.1"
-
-[dev-dependencies]
 rand_core = { version = "0.6.4", features = ["getrandom"] }
+subtle = "2.6.1"

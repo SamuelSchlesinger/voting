@@ -1,3 +1,14 @@
+//! # Cryptographic Pseudonym Implementation
+//!
+//! This module implements the cryptographic foundation for anonymous voting:
+//! - Anonymous credential issuance protocol
+//! - Pseudonym creation using zero-knowledge proofs
+//! - Verification of pseudonyms without revealing voter identity
+//!
+//! The implementation is based on BLS12-381 elliptic curve cryptography and uses
+//! a combination of blind signatures and zero-knowledge proofs to provide strong
+//! anonymity and security guarantees.
+
 use bls12_381::{Bls12, G1Affine, G1Projective, G2Affine, Scalar};
 use pairing::Engine;
 use pairing::group::ff::Field;
@@ -8,17 +19,29 @@ use subtle::{Choice, ConstantTimeEq, CtOption};
 
 use std::ops::Neg;
 
+/// Label used during the credential issuance protocol
 const CLIENT_ISSUANCE_LABEL: &[u8] = b"CLIENT_ISSUANCE";
+/// Label used during pseudonym generation
 const PSEUDONYM_LABEL: &[u8] = b"PSEUDONYM";
+/// Global domain separator for the entire protocol
 const GLOBAL_LABEL: &[u8] = b"SOCIAL_LOGIN";
 
-/// Parameters for the protocol.
+/// Parameters for the cryptographic protocol.
+///
+/// These parameters are public and shared by all participants in the system.
+/// They include common reference points for the cryptographic operations.
 #[derive(Clone, Debug)]
 pub struct Params {
+    /// A generator point used in the protocol
     h: G1Affine,
 }
 
 impl Params {
+    /// Create default protocol parameters.
+    ///
+    /// Generates deterministic parameters using a secure hash function.
+    /// These parameters are derived from a fixed seed to ensure consistency
+    /// across all participants.
     pub fn default() -> Self {
         let mut hasher = blake3::Hasher::default();
         hasher.update(b"VOTING_SCHEME_PARAMS");
@@ -29,11 +52,21 @@ impl Params {
     }
 }
 
+/// Implements the Fiat-Shamir heuristic to make interactive zero-knowledge proofs non-interactive.
+///
+/// This transforms interactive proofs into non-interactive ones by deriving 
+/// challenges from the transcript of the protocol execution, making the proof verifiable
+/// without back-and-forth communication.
 struct FiatShamir {
     hasher: blake3::Hasher,
 }
 
 impl FiatShamir {
+    /// Create a new Fiat-Shamir transcript with the given label and nonce.
+    ///
+    /// # Arguments
+    /// * `label` - Context-specific label to domain-separate different protocol usages
+    /// * `nonce` - Unique value for this protocol execution to prevent replay attacks
     fn new(label: &[u8], nonce: &[u8]) -> Self {
         let mut hasher = blake3::Hasher::new();
         hasher.update(GLOBAL_LABEL);
@@ -43,16 +76,26 @@ impl FiatShamir {
         FiatShamir { hasher }
     }
 
+    /// Add data to the transcript.
+    ///
+    /// # Arguments
+    /// * `bytes` - Data to add to the transcript
     fn update(&mut self, bytes: &[u8]) {
         self.hasher.update(bytes);
     }
 
+    /// Derive a deterministic RNG from the current transcript state.
+    ///
+    /// This creates a cryptographic RNG whose output depends deterministically
+    /// on all data that has been added to the transcript so far.
     fn rng(&self) -> impl CryptoRngCore {
         ChaCha20Rng::from_seed(*self.hasher.finalize().as_bytes())
     }
 }
 
+/// Trait for types that have an associated domain label.
 trait HasLabel {
+    /// Get the domain label for this type.
     fn label() -> &'static [u8];
 }
 
@@ -62,31 +105,49 @@ impl HasLabel for G1Affine {
     }
 }
 
-/// The private key of the issuer.
+/// The private key of the credential issuer.
+///
+/// This key is held by the authority that issues voting credentials.
+/// It must be kept secure as it allows creation of valid credentials.
 #[derive(Debug, Clone)]
 pub struct IssuerPrivateKey {
+    /// Secret scalar value
     x: Scalar,
 }
 
-/// The public key of the issuer.
+/// The public key of the credential issuer.
+///
+/// This key is published and used by voters to verify that their
+/// credentials were issued by the legitimate authority.
 #[derive(Debug, Clone)]
 pub struct IssuerPublicKey {
+    /// Public commitment to the issuer's private key
     w: G2Affine,
 }
 
-/// The private PRF key held by the client as they request credential issuance.
+/// The private key held by a voter (client).
+///
+/// This key is used to request and create credentials, and later to
+/// derive pseudonyms for voting. It must be kept secret by the voter.
 #[derive(Debug, Clone)]
 pub struct ClientPrivateKey {
+    /// Secret scalar value
     k: Scalar,
 }
 
-/// The request sent to the server by the client, proving that they know their private key.
+/// A request for credential issuance sent by a voter to the issuer.
+///
+/// This contains a commitment to the voter's private key and a zero-knowledge
+/// proof that the voter knows the private key, without revealing it.
 #[derive(Debug, Clone)]
 pub struct CredentialRequest {
+    /// Public commitment to the voter's private key
     big_k: G1Affine,
+    /// Challenge value in the zero-knowledge proof
     // This zkp is not currently necessary (the commitment still is though), however if other
     // fields were to be included in this proof you'd need this, so it is useful to keep around.
     gamma: Scalar,
+    /// Response value in the zero-knowledge proof
     k_bar: Scalar,
 }
 
@@ -228,20 +289,40 @@ impl Credential {
     }
 }
 
-/// A local pseudonym derived for a particular context. This pseudonym is unlinkable, such that
-/// even if the relying parties collude with each other and the issuer, they cannot link two
-/// pseudonyms derived from the same underlying credential.
+/// A cryptographic pseudonym used to cast votes anonymously.
+///
+/// This pseudonym is unlinkable, meaning that even if multiple election authorities
+/// (relying parties) collude with each other and with the credential issuer, they cannot 
+/// link two pseudonyms derived from the same voter's credential. This provides strong 
+/// anonymity guarantees while still allowing verification of vote authenticity.
+///
+/// Each pseudonym contains a zero-knowledge proof that:
+/// 1. It was derived from a valid credential
+/// 2. The voter knows the private key for this credential
+/// 3. The pseudonym is properly bound to the specific election
+///
+/// This proof can be verified without compromising the voter's anonymity.
 #[derive(Debug, Clone)]
 pub struct Pseudonym {
+    /// Identifier for the election this pseudonym is for
     relying_party_id: Scalar,
+    /// Modified credential signature point
     a_prime: G1Affine,
+    /// Commitment to the voter's private key
     b_bar: G1Affine,
+    /// Proof component for credential validity
     a_bar: G1Affine,
+    /// The actual pseudonym identifier (unique for each voter+election combination)
     y: G1Affine,
+    /// Challenge value in the zero-knowledge proof
     gamma: Scalar,
+    /// First response value in the zero-knowledge proof
     z_e: Scalar,
+    /// Second response value in the zero-knowledge proof
     z_r2: Scalar,
+    /// Third response value in the zero-knowledge proof
     z_r3: Scalar,
+    /// Fourth response value in the zero-knowledge proof
     z_k: Scalar,
 }
 
