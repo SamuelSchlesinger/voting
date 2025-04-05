@@ -9,4 +9,8 @@ bls12_381 = { version = "0.8.0", features = ["group"] }
 pairing = "0.23.0"
 rand_chacha = "0.3.1"
 rand_core = { version = "0.6.4", features = ["getrandom"] }
+serde = { version = "1.0.219", features = ["derive"] }
 subtle = "2.6.1"
+
+[dev-dependencies]
+serde_json = "1.0"

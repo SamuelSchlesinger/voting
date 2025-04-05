@@ -20,10 +20,12 @@ use bls12_381::Scalar;
 use rand_chacha::ChaCha20Rng;
 use rand_core::{RngCore, OsRng, SeedableRng};
 use pseudonym::{IssuerPublicKey, Params, Pseudonym, Credential};
+use serde::{Serialize, Deserialize};
+use serde::ser::SerializeTuple;
 
 /// A vote cast by a voter, consisting of their choice and an anonymous pseudonym
 /// that proves their eligibility to vote without revealing their identity.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Vote {
     /// The voter's selection or ballot choice (e.g., "Candidate A", "Yes", etc.)
     pub choice: String,
@@ -41,9 +43,54 @@ pub struct Nonce {
 /// A unique identifier for an election.
 /// Different elections have different ElectionIDs to ensure votes for one election
 /// cannot be used in another.
-#[derive(Clone, PartialEq, Eq, Hash, Debug)]
+#[derive(Clone, PartialEq, Eq, Hash, Debug, Serialize, Deserialize)]
 pub struct ElectionID {
     bytes: [u8; 32],
+}
+
+impl Serialize for Nonce {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        // Serialize bytes as a sequence
+        let mut seq = serializer.serialize_tuple(self.bytes.len())?;
+        for byte in &self.bytes {
+            seq.serialize_element(byte)?;
+        }
+        seq.end()
+    }
+}
+
+impl<'de> Deserialize<'de> for Nonce {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        struct NonceVisitor;
+
+        impl<'de> serde::de::Visitor<'de> for NonceVisitor {
+            type Value = Nonce;
+
+            fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                formatter.write_str("a sequence of 48 bytes")
+            }
+
+            fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
+            where
+                A: serde::de::SeqAccess<'de>,
+            {
+                let mut bytes = [0u8; 48];
+                for i in 0..bytes.len() {
+                    bytes[i] = seq.next_element()?
+                        .ok_or_else(|| serde::de::Error::invalid_length(i, &self))?;
+                }
+                Ok(Nonce { bytes })
+            }
+        }
+
+        deserializer.deserialize_tuple(48, NonceVisitor)
+    }
 }
 
 impl Credential {
@@ -116,12 +163,146 @@ impl Vote {
 /// The database maintains two collections:
 /// - `votes`: Valid votes indexed by election ID and nonce
 /// - `liars`: Detected double-vote attempts, for auditing and security purposes
+#[derive(Debug, Clone)]
 pub struct VoteDatabase {
     votes: HashMap<ElectionID, HashMap<Nonce, Vote>>,
     liars: HashMap<ElectionID, HashMap<Nonce, HashMap<String, Vote>>>,
 }
 
+impl Serialize for VoteDatabase {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        use serde::ser::SerializeMap;
+        
+        let mut map = serializer.serialize_map(Some(2))?;
+        
+        // Convert the votes HashMap into a serializable format
+        let votes_vec: Vec<(ElectionID, Vec<(Nonce, Vote)>)> = self.votes
+            .iter()
+            .map(|(election_id, vote_map)| {
+                let votes: Vec<(Nonce, Vote)> = vote_map
+                    .iter()
+                    .map(|(nonce, vote)| (nonce.clone(), vote.clone()))
+                    .collect();
+                (election_id.clone(), votes)
+            })
+            .collect();
+        
+        // Convert the liars HashMap into a serializable format
+        let liars_vec: Vec<(ElectionID, Vec<(Nonce, Vec<(String, Vote)>)>)> = self.liars
+            .iter()
+            .map(|(election_id, liars_map)| {
+                let liars: Vec<(Nonce, Vec<(String, Vote)>)> = liars_map
+                    .iter()
+                    .map(|(nonce, choices_map)| {
+                        let choices: Vec<(String, Vote)> = choices_map
+                            .iter()
+                            .map(|(choice, vote)| (choice.clone(), vote.clone()))
+                            .collect();
+                        (nonce.clone(), choices)
+                    })
+                    .collect();
+                (election_id.clone(), liars)
+            })
+            .collect();
+        
+        map.serialize_entry("votes", &votes_vec)?;
+        map.serialize_entry("liars", &liars_vec)?;
+        
+        map.end()
+    }
+}
+
+impl<'de> Deserialize<'de> for VoteDatabase {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        use serde::de::{MapAccess, Visitor};
+        use std::fmt;
+        use std::marker::PhantomData;
+
+        struct VoteDatabaseVisitor {
+            marker: PhantomData<fn() -> VoteDatabase>,
+        }
+
+        impl<'de> Visitor<'de> for VoteDatabaseVisitor {
+            type Value = VoteDatabase;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                formatter.write_str("a VoteDatabase")
+            }
+
+            fn visit_map<M>(self, mut map: M) -> Result<VoteDatabase, M::Error>
+            where
+                M: MapAccess<'de>,
+            {
+                let mut votes = None;
+                let mut liars = None;
+
+                while let Some(key) = map.next_key::<String>()? {
+                    match key.as_str() {
+                        "votes" => {
+                            if votes.is_some() {
+                                return Err(serde::de::Error::duplicate_field("votes"));
+                            }
+                            let votes_vec: Vec<(ElectionID, Vec<(Nonce, Vote)>)> = map.next_value()?;
+                            let mut votes_map = HashMap::new();
+                            
+                            for (election_id, vote_pairs) in votes_vec {
+                                let mut inner_map = HashMap::new();
+                                for (nonce, vote) in vote_pairs {
+                                    inner_map.insert(nonce, vote);
+                                }
+                                votes_map.insert(election_id, inner_map);
+                            }
+                            
+                            votes = Some(votes_map);
+                        }
+                        "liars" => {
+                            if liars.is_some() {
+                                return Err(serde::de::Error::duplicate_field("liars"));
+                            }
+                            let liars_vec: Vec<(ElectionID, Vec<(Nonce, Vec<(String, Vote)>)>)> = map.next_value()?;
+                            let mut liars_map = HashMap::new();
+                            
+                            for (election_id, liar_pairs) in liars_vec {
+                                let mut election_map = HashMap::new();
+                                for (nonce, choice_pairs) in liar_pairs {
+                                    let mut choices_map = HashMap::new();
+                                    for (choice, vote) in choice_pairs {
+                                        choices_map.insert(choice, vote);
+                                    }
+                                    election_map.insert(nonce, choices_map);
+                                }
+                                liars_map.insert(election_id, election_map);
+                            }
+                            
+                            liars = Some(liars_map);
+                        }
+                        _ => {
+                            return Err(serde::de::Error::unknown_field(&key, &["votes", "liars"]));
+                        }
+                    }
+                }
+
+                let votes = votes.unwrap_or_else(HashMap::new);
+                let liars = liars.unwrap_or_else(HashMap::new);
+
+                Ok(VoteDatabase { votes, liars })
+            }
+        }
+
+        deserializer.deserialize_map(VoteDatabaseVisitor {
+            marker: PhantomData,
+        })
+    }
+}
+
 /// Errors that can occur during the voting process.
+#[derive(Debug)]
 pub enum VotingError {
     /// The vote could not be verified as authentic
     Unauthenticated,
@@ -345,6 +526,12 @@ mod tests {
     fn create_election_id() -> ElectionID {
         let scalar = Scalar::random(OsRng);
         ElectionID { bytes: scalar.to_bytes() }
+    }
+    
+    // Helper function to create an invalid election ID (all zeros, which is not a valid scalar)
+    fn create_invalid_election_id() -> ElectionID {
+        // The scalar value 0 is not a valid scalar in BLS12-381
+        ElectionID { bytes: [0u8; 32] }
     }
     
     // Helper function to setup testing credentials
@@ -645,6 +832,194 @@ mod tests {
         assert!(db1.verify(&issuer_private_key.public()));
     }
 
+    #[test]
+    fn test_nonce_serialization() {
+        // Create a nonce directly with test data
+        let bytes = [1u8; 48];
+        let nonce = Nonce { bytes };
+        
+        // Serialize to JSON
+        let serialized = serde_json::to_string(&nonce).expect("Failed to serialize nonce");
+        
+        // Deserialize from JSON
+        let deserialized: Nonce = serde_json::from_str(&serialized).expect("Failed to deserialize nonce");
+        
+        // Check the values match
+        assert_eq!(nonce, deserialized);
+        assert_eq!(nonce.bytes, deserialized.bytes);
+    }
+    
+    #[test]
+    fn test_election_id_serialization() {
+        // Create an election ID directly with test data
+        let bytes = [2u8; 32];
+        let election_id = ElectionID { bytes };
+        
+        // Serialize to JSON
+        let serialized = serde_json::to_string(&election_id).expect("Failed to serialize ElectionID");
+        
+        // Deserialize from JSON
+        let deserialized: ElectionID = serde_json::from_str(&serialized).expect("Failed to deserialize ElectionID");
+        
+        // Check the values match
+        assert_eq!(election_id, deserialized);
+        assert_eq!(election_id.bytes, deserialized.bytes);
+    }
+    
+    #[test]
+    fn test_vote_serialization() {
+        let (_, issuer_private_key, credential) = setup_credentials();
+        let election_id = create_election_id();
+        let choice = "Candidate A".to_string();
+        
+        // Create vote
+        let vote = credential.vote(election_id.clone(), choice.clone()).unwrap();
+        
+        // Serialize to JSON
+        let serialized = serde_json::to_string(&vote).expect("Failed to serialize Vote");
+        
+        // Deserialize from JSON
+        let deserialized: Vote = serde_json::from_str(&serialized).expect("Failed to deserialize Vote");
+        
+        // Check that the deserialized vote still verifies
+        assert!(deserialized.verify(&issuer_private_key.public()));
+        assert_eq!(vote.choice, deserialized.choice);
+        assert_eq!(vote.nonce(), deserialized.nonce());
+        assert_eq!(vote.election_id(), deserialized.election_id());
+    }
+    
+    #[test]
+    fn test_vote_database_serialization() {
+        let (_, issuer_private_key, credential) = setup_credentials();
+        let election_id = create_election_id();
+        let choice = "Candidate A".to_string();
+        
+        // Create vote and database
+        let vote = credential.vote(election_id.clone(), choice).unwrap();
+        
+        let mut db = VoteDatabase::new();
+        db.enable_election(election_id.clone());
+        let result = db.add_vote(vote.clone(), &issuer_private_key.public());
+        assert!(result.is_ok());
+        
+        // Serialize to JSON
+        let serialized = serde_json::to_string(&db).expect("Failed to serialize VoteDatabase");
+        
+        // Deserialize from JSON
+        let deserialized: VoteDatabase = serde_json::from_str(&serialized).expect("Failed to deserialize VoteDatabase");
+        
+        // Verify database integrity after deserialization
+        assert!(deserialized.verify(&issuer_private_key.public()));
+        assert!(deserialized.election_enabled(&election_id));
+    }
+    
+    #[test]
+    fn test_vote_with_invalid_election_id() {
+        // We're testing that all-zero bytes aren't valid for election IDs
+        // We need to specifically use a truly invalid scalar, not just zeros
+        // One way is to use bytes that represent a value >= the field modulus
+        let (_, _, credential) = setup_credentials();
+        
+        // Create an election ID with bytes that would represent a value larger than the BLS12-381 field modulus
+        let mut invalid_bytes = [0xFF; 32]; // All ones, definitely greater than modulus
+        let election_id = ElectionID { bytes: invalid_bytes };
+        let choice = "Candidate A".to_string();
+        
+        // Try to create a vote with an invalid election ID
+        let vote_result = credential.vote(election_id, choice);
+        
+        // Should return None since the election ID is invalid
+        assert!(vote_result.is_none());
+    }
+    
+    #[test]
+    fn test_malformed_nonce_serialization() {
+        // Create a unique nonce
+        let nonce = Nonce { bytes: [99u8; 48] };
+        
+        // Serialize to JSON
+        let serialized = serde_json::to_string(&nonce).expect("Failed to serialize nonce");
+        
+        // Alter the serialized data to make it invalid (truncate it)
+        let truncated_json = serialized.split(',').take(20).collect::<Vec<_>>().join(",") + "]}";
+        
+        // Deserialize from invalid JSON - should fail
+        let result: Result<Nonce, _> = serde_json::from_str(&truncated_json);
+        assert!(result.is_err());
+    }
+    
+    #[test]
+    fn test_database_verification_with_tampered_vote() {
+        let (_, issuer_private_key, credential) = setup_credentials();
+        let election_id = create_election_id();
+        let choice = "Candidate A".to_string();
+        
+        // Create legitimate vote
+        let vote = credential.vote(election_id.clone(), choice).unwrap();
+        let nonce = vote.nonce();
+        
+        // Create database and add vote
+        let mut db = VoteDatabase::new();
+        db.enable_election(election_id.clone());
+        db.add_vote(vote.clone(), &issuer_private_key.public()).unwrap();
+        
+        // Create a tampered vote with a different choice but same nonce
+        // This is done by direct manipulation of the vote data structure
+        let mut tampered_vote = vote.clone();
+        tampered_vote.choice = "Tampered Choice".to_string();
+        
+        // Manually insert tampered vote to bypass verification
+        let votes_for_election = db.votes.get_mut(&election_id).unwrap();
+        votes_for_election.insert(nonce, tampered_vote);
+        
+        // Database verification should fail
+        assert!(!db.verify(&issuer_private_key.public()));
+    }
+    
+    #[test]
+    fn test_detailed_database_liars_handling() {
+        let (_, issuer_private_key, credential) = setup_credentials();
+        let election_id = create_election_id();
+        
+        // Create two contradictory votes from same credential
+        let vote1 = credential.vote(election_id.clone(), "Candidate A".to_string()).unwrap();
+        let vote2 = credential.vote(election_id.clone(), "Candidate B".to_string()).unwrap();
+        let vote3 = credential.vote(election_id.clone(), "Candidate C".to_string()).unwrap();
+        
+        // Create two databases
+        let mut db1 = VoteDatabase::new();
+        let mut db2 = VoteDatabase::new();
+        
+        db1.enable_election(election_id.clone());
+        db2.enable_election(election_id.clone());
+        
+        // Put first vote in first database
+        db1.add_vote(vote1.clone(), &issuer_private_key.public()).unwrap();
+        
+        // Put second vote in second database
+        db2.add_vote(vote2.clone(), &issuer_private_key.public()).unwrap();
+        
+        // Combine databases to trigger liar detection
+        db1.combine(&db2);
+        
+        // Add third vote to test multiple conflicts
+        let result = db1.add_vote(vote3.clone(), &issuer_private_key.public());
+        assert!(matches!(result, Err(VotingError::DoubleVote { .. })));
+        
+        // Verify internal liar structures were correctly populated
+        let liars = db1.liars.get(&election_id).unwrap();
+        let nonce = vote1.nonce();
+        let liar_choices = liars.get(&nonce).unwrap();
+        
+        // Should have at least two choices recorded
+        assert!(liar_choices.len() >= 2);
+        assert!(liar_choices.contains_key(&vote1.choice));
+        assert!(liar_choices.contains_key(&vote2.choice));
+        
+        // Database should still verify correctly
+        assert!(db1.verify(&issuer_private_key.public()));
+    }
+    
     #[test]
     fn test_random_voting_scenario() {
         // Complex test with multiple voters and elections
