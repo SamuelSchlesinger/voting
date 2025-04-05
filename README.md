@@ -1,5 +1,7 @@
 # Anonymous Voting Library
 
+[Interactive Demo](https://samuelschlesinger.github.io/voting/)
+
 This library implements a cryptographically secure anonymous voting system. It
 enables voters to participate in elections while maintaining their anonymity,
 preventing double voting, and allowing for public auditability of results
