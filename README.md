@@ -107,3 +107,4 @@ Potential areas for extension include:
 ## References
 
 - [A Graduate Course in Applied Cryptography by Boneh & Shoup (version 0.6)](https://toc.cryptobook.us/)
+- [A Verifiable Random Function with Short Proofs and Keys by Dodis & Yampolskiy](https://eprint.iacr.org/2004/310.pdf)
