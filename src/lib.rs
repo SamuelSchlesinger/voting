@@ -338,13 +338,13 @@ mod tests {
     use pairing::group::ff::Field;
     use crate::pseudonym::{IssuerPrivateKey, ClientPrivateKey, Params};
 
-    /// Helper function to create a valid election ID
+    // Helper function to create a valid election ID
     fn create_election_id() -> ElectionID {
         let scalar = Scalar::random(OsRng);
         ElectionID { bytes: scalar.to_bytes() }
     }
     
-    /// Helper function to setup testing credentials
+    // Helper function to setup testing credentials
     fn setup_credentials() -> (Params, IssuerPrivateKey, Credential) {
         let params = Params::default();
         let issuer_private_key = IssuerPrivateKey::random(OsRng);
@@ -362,108 +362,81 @@ mod tests {
 
     #[test]
     fn test_vote_creation_and_verification() {
-        // Single issuer for this test
         let (_, issuer_private_key, credential) = setup_credentials();
         let election_id = create_election_id();
         let choice = "Candidate A".to_string();
         
-        // Create a vote
         let vote = credential.vote(election_id.clone(), choice.clone()).unwrap();
         
-        // Verify the vote with the same issuer's public key
         assert!(vote.verify(&issuer_private_key.public()));
-        
-        // Check that nonce and election ID are correctly extracted
         assert_eq!(vote.election_id(), election_id);
         assert_eq!(vote.choice, choice);
     }
 
     #[test]
     fn test_vote_unique_nonce() {
-        // Single issuer for this test
         let (_, issuer_private_key, credential) = setup_credentials();
         let election_id = create_election_id();
         
-        // Create two votes for the same election with different choices
         let vote1 = credential.vote(election_id.clone(), "Candidate A".to_string()).unwrap();
         let vote2 = credential.vote(election_id.clone(), "Candidate B".to_string()).unwrap();
         
-        // Different votes for the same election from the same credential should have the same nonce
-        // to prevent double voting
+        // Same credential for same election should generate identical nonce to prevent double voting
         assert_eq!(vote1.nonce(), vote2.nonce());
-        
-        // But they should have the same election ID
         assert_eq!(vote1.election_id(), vote2.election_id());
-        
-        // Both should verify with the same issuer's public key
         assert!(vote1.verify(&issuer_private_key.public()));
         assert!(vote2.verify(&issuer_private_key.public()));
     }
 
     #[test]
     fn test_vote_different_elections() {
-        // Single issuer for this test
         let (_, issuer_private_key, credential) = setup_credentials();
         let election_id1 = create_election_id();
         let election_id2 = create_election_id();
         
-        // Create votes for different elections with the same credential
         let vote1 = credential.vote(election_id1.clone(), "Yes".to_string()).unwrap();
         let vote2 = credential.vote(election_id2.clone(), "Yes".to_string()).unwrap();
         
-        // Should have different election IDs
         assert_ne!(vote1.election_id(), vote2.election_id());
-        
-        // But both should verify with the same issuer's public key
         assert!(vote1.verify(&issuer_private_key.public()));
         assert!(vote2.verify(&issuer_private_key.public()));
     }
 
     #[test]
     fn test_vote_database_basic() {
-        // Single issuer for this test and database
         let (_, issuer_private_key, credential) = setup_credentials();
         let election_id = create_election_id();
         let choice = "Candidate A".to_string();
         
-        // Create a vote
         let vote = credential.vote(election_id.clone(), choice).unwrap();
         
-        // Create a database and enable the election
         let mut db = VoteDatabase::new();
         db.enable_election(election_id.clone());
         
-        // Check if the election is enabled
         assert!(db.election_enabled(&election_id));
         
-        // Add the vote to the database using the issuer's public key
         let result = db.add_vote(vote.clone(), &issuer_private_key.public());
         assert!(result.is_ok());
         
-        // Verify the database with the same issuer's public key
         assert!(db.verify(&issuer_private_key.public()));
     }
 
     #[test]
     fn test_vote_database_nonexistent_election() {
-        // Single issuer for this test and database
         let (_, issuer_private_key, credential) = setup_credentials();
         let election_id = create_election_id();
         let choice = "Candidate A".to_string();
         
-        // Create a vote with the same issuer
         let vote = credential.vote(election_id.clone(), choice).unwrap();
         
-        // Create a database but don't enable the election
+        // Create database without enabling the election
         let mut db = VoteDatabase::new();
         
-        // Check if the election is not enabled
         assert!(!db.election_enabled(&election_id));
         
-        // Try to add the vote to the database using the correct issuer's public key
         let result = db.add_vote(vote, &issuer_private_key.public());
         
-        // Should fail with NonexistentElection, not authentication issues
+        // Test properly detects missing election
         match result {
             Err(VotingError::NonexistentElection(_)) => (),
             _ => panic!("Expected NonexistentElection error"),
@@ -472,26 +445,22 @@ mod tests {
 
     #[test]
     fn test_vote_database_double_vote() {
-        // Single issuer for this test and database
         let (_, issuer_private_key, credential) = setup_credentials();
         let election_id = create_election_id();
         
-        // Create two votes for the same election with different choices using the same credential
+        // Create two different votes from same credential for same election
         let vote1 = credential.vote(election_id.clone(), "Candidate A".to_string()).unwrap();
         let vote2 = credential.vote(election_id.clone(), "Candidate B".to_string()).unwrap();
         
-        // Create a database and enable the election
         let mut db = VoteDatabase::new();
         db.enable_election(election_id);
         
-        // Add the first vote with the issuer's public key
         let result1 = db.add_vote(vote1.clone(), &issuer_private_key.public());
         assert!(result1.is_ok());
         
-        // Try to add the second vote (double vote) with the same issuer's public key
+        // Second vote should be rejected as double-voting
         let result2 = db.add_vote(vote2.clone(), &issuer_private_key.public());
         
-        // Should fail with DoubleVote
         match result2 {
             Err(VotingError::DoubleVote { new_choice, original_choice }) => {
                 assert_eq!(new_choice, "Candidate B");
@@ -500,66 +469,55 @@ mod tests {
             _ => panic!("Expected DoubleVote error"),
         }
         
-        // Verify the database is still valid with the same issuer's public key
         assert!(db.verify(&issuer_private_key.public()));
     }
 
     #[test]
     fn test_vote_database_multiple_elections() {
-        // Single issuer for this test and database
         let (_, issuer_private_key, credential) = setup_credentials();
         let election_id1 = create_election_id();
         let election_id2 = create_election_id();
         
-        // Create votes for different elections using the same credential and issuer
         let vote1 = credential.vote(election_id1.clone(), "Yes".to_string()).unwrap();
         let vote2 = credential.vote(election_id2.clone(), "No".to_string()).unwrap();
         
-        // Create a database and enable both elections
         let mut db = VoteDatabase::new();
         db.enable_election(election_id1.clone());
         db.enable_election(election_id2.clone());
         
-        // Add both votes with the same issuer's public key
         let result1 = db.add_vote(vote1, &issuer_private_key.public());
         let result2 = db.add_vote(vote2, &issuer_private_key.public());
         
-        // Both should succeed
         assert!(result1.is_ok());
         assert!(result2.is_ok());
         
-        // Verify the database with the same issuer's public key
         assert!(db.verify(&issuer_private_key.public()));
     }
 
     #[test]
     fn test_vote_database_unauthenticated() {
-        // For this specific test, we need two different issuers to demonstrate the unauthenticated case
+        // Testing with two different issuers to demonstrate credential validation
         let (_, issuer_private_key1, credential1) = setup_credentials();
-        let (_, issuer_private_key2, _) = setup_credentials(); // Different issuer
+        let (_, issuer_private_key2, _) = setup_credentials(); 
         let election_id1 = create_election_id();
-        let election_id2 = election_id1.clone(); // Clone for second database
+        let election_id2 = election_id1.clone();
         let choice1 = "Candidate A".to_string();
-        let choice2 = "Candidate A".to_string(); // Create a new string for second vote
+        let choice2 = "Candidate A".to_string();
         
-        // Create a vote with the first credential
         let vote = credential1.vote(election_id1.clone(), choice1).unwrap();
         
-        // Create a database and enable the election
         let mut db = VoteDatabase::new();
         db.enable_election(election_id1.clone());
         
-        // Try to add the vote but verify with a different issuer's public key
-        // This simulates trying to use a vote from one VoteDatabase in another with a different issuer
+        // Using wrong issuer's public key should fail authentication
         let result = db.add_vote(vote, &issuer_private_key2.public());
         
-        // Should fail with Unauthenticated
         match result {
             Err(VotingError::Unauthenticated) => (),
             _ => panic!("Expected Unauthenticated error"),
         }
         
-        // Verify that it would have worked with the correct issuer
+        // Verify that correct issuer works
         let mut db2 = VoteDatabase::new();
         db2.enable_election(election_id2.clone());
         let vote2 = credential1.vote(election_id2, choice2).unwrap();
@@ -569,27 +527,21 @@ mod tests {
 
     #[test]
     fn test_vote_database_combine() {
-        // Test the more basic functionality of database combination
-        
-        // Create a single issuer for all credentials
         let (params, issuer_private_key, _) = setup_credentials();
         let issuer_public_key = issuer_private_key.public();
         
-        // Create election IDs
         let election_id1 = create_election_id();
         let election_id2 = create_election_id();
         
-        // Create databases
         let mut db1 = VoteDatabase::new();
         let mut db2 = VoteDatabase::new();
         
-        // Enable elections in both databases
         db1.enable_election(election_id1.clone());
         db1.enable_election(election_id2.clone());
         db2.enable_election(election_id1.clone());
         db2.enable_election(election_id2.clone());
         
-        // Create different voters/credentials - all using the same issuer private key
+        // Create four different voters
         let client_key1 = ClientPrivateKey::random(OsRng);
         let client_key2 = ClientPrivateKey::random(OsRng);
         let client_key3 = ClientPrivateKey::random(OsRng);
@@ -612,90 +564,72 @@ mod tests {
         let resp4 = req4.respond(&issuer_private_key, &params, OsRng).unwrap();
         let cred4 = client_key4.create_credential(&req4, &resp4, &issuer_public_key).unwrap();
         
-        // Create votes
-        // DB1: cred1 votes in election1, cred2 votes in election2
+        // DB1: first two voters vote in different elections
         let vote1 = cred1.vote(election_id1.clone(), "Yes".to_string()).unwrap();
         let vote2 = cred2.vote(election_id2.clone(), "No".to_string()).unwrap();
         
-        // DB2: cred3 votes in election1, cred4 votes in election2
+        // DB2: other two voters vote in different elections
         let vote3 = cred3.vote(election_id1.clone(), "Maybe".to_string()).unwrap();
         let vote4 = cred4.vote(election_id2.clone(), "Abstain".to_string()).unwrap();
         
-        // Add votes to databases - using the same issuer's public key
         assert!(db1.add_vote(vote1, &issuer_public_key).is_ok());
         assert!(db1.add_vote(vote2, &issuer_public_key).is_ok());
         assert!(db2.add_vote(vote3, &issuer_public_key).is_ok());
         assert!(db2.add_vote(vote4, &issuer_public_key).is_ok());
         
-        // Verify each database
         assert!(db1.verify(&issuer_public_key));
         assert!(db2.verify(&issuer_public_key));
         
-        // Combine databases
+        // Test database combining
         db1.combine(&db2);
-        
-        // Verify combined database
         assert!(db1.verify(&issuer_public_key));
         
-        // Combine back to db2
         db2.combine(&db1);
-        
-        // Verify both databases now have all votes
         assert!(db1.verify(&issuer_public_key));
         assert!(db2.verify(&issuer_public_key));
     }
 
     #[test]
     fn test_vote_database_combine_conflict() {
-        // Use a single issuer for this test
         let (_, issuer_private_key, credential) = setup_credentials();
         let election_id = create_election_id();
         
-        // Create two votes with different choices (from the same credential)
+        // Create two contradictory votes from same credential
         let vote1 = credential.vote(election_id.clone(), "Candidate A".to_string()).unwrap();
         let vote2 = credential.vote(election_id.clone(), "Candidate B".to_string()).unwrap();
         
-        // Create two databases that share the same issuer
         let mut db1 = VoteDatabase::new();
         let mut db2 = VoteDatabase::new();
         
-        // Enable the election in both databases
         db1.enable_election(election_id.clone());
         db2.enable_election(election_id.clone());
         
-        // Add the first vote to database 1
+        // Put first vote in first database
         let result1 = db1.add_vote(vote1.clone(), &issuer_private_key.public());
         assert!(result1.is_ok());
         
-        // Add the second vote to database 2
+        // Put second vote in second database
         let result2 = db2.add_vote(vote2.clone(), &issuer_private_key.public());
         assert!(result2.is_ok());
         
-        // Combine the databases - this should detect a conflict
+        // Combining databases should detect conflict (recorded as "liar")
         db1.combine(&db2);
-        
-        // The conflict should be recorded as a "liar" in db1
-        // We can't easily check this directly, but we can verify that the database is still valid
         assert!(db1.verify(&issuer_private_key.public()));
     }
 
     #[test]
     fn test_random_voting_scenario() {
-        // This test simulates a more complex voting scenario with multiple voters and elections
-        
-        // Setup - using a single issuer for the entire VoteDatabase ecosystem
+        // Complex test with multiple voters and elections
         let params = Params::default();
         let issuer_private_key = IssuerPrivateKey::random(OsRng);
         let issuer_public_key = issuer_private_key.public();
         
-        // Create multiple elections
         let num_elections = 5;
         let mut election_ids = Vec::with_capacity(num_elections);
         for _ in 0..num_elections {
             election_ids.push(create_election_id());
         }
         
-        // Create multiple voters (credentials) - all using the same issuer
         let num_voters = 20;
         let mut credentials = Vec::with_capacity(num_voters);
         for _ in 0..num_voters {
@@ -710,40 +644,34 @@ mod tests {
             credentials.push(credential);
         }
         
-        // Create vote database and enable all elections
         let mut db = VoteDatabase::new();
         for election_id in &election_ids {
             db.enable_election(election_id.clone());
         }
         
-        // Track which credential has voted in which election
+        // Track which credential voted in which election
         let mut voted_credential_elections = std::collections::HashMap::new();
         
-        // Have each voter vote in random elections
         let choices = ["Yes", "No", "Maybe", "Abstain"];
         let mut _vote_count = 0;
         
         for (i, credential) in credentials.iter().enumerate() {
-            // Choose random number of elections to vote in
+            // Random number of votes per voter
             let num_votes = (OsRng.next_u32() % num_elections as u32) + 1;
             let mut voted_elections = std::collections::HashSet::new();
             
             for _ in 0..num_votes {
-                // Choose random election (but don't vote twice in same election)
                 let election_idx = (OsRng.next_u32() % num_elections as u32) as usize;
                 if voted_elections.contains(&election_idx) {
                     continue;
                 }
                 voted_elections.insert(election_idx);
                 
-                // Track which credential has voted in which election
                 voted_credential_elections.insert((i, election_idx), true);
                 
-                // Choose random choice
                 let choice_idx = (OsRng.next_u32() % choices.len() as u32) as usize;
                 let choice = choices[choice_idx].to_string();
                 
-                // Create and add vote - using the same issuer's public key
                 let vote = credential.vote(election_ids[election_idx].clone(), choice).unwrap();
                 let result = db.add_vote(vote, &issuer_public_key);
                 assert!(result.is_ok());
@@ -751,57 +679,46 @@ mod tests {
             }
         }
         
-        // Verify the database with the same issuer's public key
         assert!(db.verify(&issuer_public_key));
         
-        // Simulate an attempted double-vote
-        // Find a credential that has voted in at least one election
+        // Test double-voting detection
         for (i, credential) in credentials.iter().enumerate() {
             for election_idx in 0..num_elections {
                 if voted_credential_elections.contains_key(&(i, election_idx)) {
-                    // This credential has already voted in this election, try to vote again
+                    // Try to vote again with same credential
                     let vote = credential.vote(election_ids[election_idx].clone(), "Double Vote".to_string()).unwrap();
                     let result = db.add_vote(vote, &issuer_public_key);
                     
-                    // Should fail with DoubleVote
                     assert!(matches!(result, Err(VotingError::DoubleVote { .. })));
-                    
-                    // We successfully tested the double vote, no need to continue
                     return;
                 }
             }
         }
         
-        // Database should still be valid after attempted double vote
         assert!(db.verify(&issuer_public_key));
         
-        // Test database combination - creating a second database that uses the same issuer
+        // Test database combination with non-conflicting votes
         let mut db2 = VoteDatabase::new();
         for election_id in &election_ids {
             db2.enable_election(election_id.clone());
         }
         
-        // Create some new votes for db2 with credentials that haven't voted in certain elections
         if !credentials.is_empty() {
             for i in 0..std::cmp::min(credentials.len(), num_elections) {
                 for election_idx in 0..num_elections {
-                    // Only add votes for elections where this credential hasn't voted yet
                     if !voted_credential_elections.contains_key(&(i, election_idx)) {
                         let credential = &credentials[i];
                         let vote = credential.vote(election_ids[election_idx].clone(), "Db2 Vote".to_string()).unwrap();
                         let result = db2.add_vote(vote, &issuer_public_key);
                         assert!(result.is_ok());
                         _vote_count += 1;
-                        break; // Just add one vote per credential
+                        break;
                     }
                 }
             }
         }
         
-        // Combine the databases that use the same issuer
         db.combine(&db2);
-        
-        // Final verification with the shared issuer
         assert!(db.verify(&issuer_public_key));
     }
 }

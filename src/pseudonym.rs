@@ -444,11 +444,14 @@ impl Pseudonym {
 
 #[test]
 fn test() {
+    // Test the core pseudonym functionality with 10 iterations
     for _ in 0..10 {
         use rand_core::OsRng;
         let params = Params::default();
         let issuer_private_key = IssuerPrivateKey::random(OsRng);
         let client_private_key = ClientPrivateKey::random(OsRng);
+        
+        // Complete credential issuance protocol
         let credreq = client_private_key.request(&params, OsRng);
         let credresp = credreq
             .respond(&issuer_private_key, &params, OsRng)
@@ -456,9 +459,13 @@ fn test() {
         let cred1 = client_private_key
             .create_credential(&credreq, &credresp, &issuer_private_key.public())
             .unwrap();
+            
+        // Verify credential
         assert!(bool::from(
             cred1.verify(&params, &issuer_private_key.public())
         ));
+        
+        // Create and verify pseudonym
         let relying_party_id = Scalar::random(OsRng);
         let pseudonym1 = cred1
             .pseudonym_for(&params, relying_party_id, b"nonce", OsRng)
