@@ -2,8 +2,8 @@
 
 This library implements a cryptographically secure anonymous voting system. It
 enables voters to participate in elections while maintaining their anonymity,
-preventing double voting, and allowing for verification of results without
-compromising privacy.
+preventing double voting, and allowing for public auditability of results
+without compromising privacy.
 
 ## Key Features
 
@@ -29,7 +29,7 @@ zero-knowledge proofs to provide its security guarantees:
    issuing authority without revealing their private keys.
 2. **Unlinkable Pseudonyms**: For each election, voters derive unique
    pseudonyms from their credentials in a way that prevents different
-pseudonyms from being linked to the same voter.
+   pseudonyms from being linked to the same voter.
 3. **Zero-Knowledge Proofs**: Voters prove their eligibility without revealing
    their identity through non-interactive zero-knowledge proofs.
 
