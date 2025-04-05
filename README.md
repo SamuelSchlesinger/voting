@@ -103,3 +103,7 @@ Potential areas for extension include:
 - Receipt-free voting to prevent vote selling
 - Threshold cryptography for distributing trust among multiple authorities
 - Integration with decentralized identity systems
+
+## References
+
+- [A Graduate Course in Applied Cryptography by Boneh & Shoup (version 0.6)](https://toc.cryptobook.us/)
