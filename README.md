@@ -5,6 +5,11 @@ enables voters to participate in elections while maintaining their anonymity,
 preventing double voting, and allowing for public auditability of results
 without compromising privacy.
 
+## WARNING
+
+This library is unaudited and contains experimental cryptography. Please do not
+rely on this in any production environment.
+
 ## Key Features
 
 - **Strong Anonymity**: Votes cannot be linked back to the voter's identity,
