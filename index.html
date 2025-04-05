@@ -451,17 +451,17 @@
                     <div class="visual-box">
                         <div class="visual-icon">🔑</div>
                         <h3>Credentials</h3>
-                        <p>Cryptographic proof of voter eligibility that doesn't reveal voter identity</p>
+                        <p>Cryptographic credential each voter creates and keeps secret</p>
                     </div>
                     <div class="visual-box">
                         <div class="visual-icon">👤</div>
                         <h3>Pseudonyms</h3>
-                        <p>Unique, unlinkable identifiers for each voter in an election</p>
+                        <p>Unique, unlinkable identifiers with zero-knowledge validity proofs for each voter in an election</p>
                     </div>
                     <div class="visual-box">
                         <div class="visual-icon">🗳️</div>
                         <h3>Votes</h3>
-                        <p>Ballot choice with cryptographic proof of eligibility</p>
+                        <p>Ballot choice with associated pseudonym signing this choice for the given election</p>
                     </div>
                     <div class="visual-box">
                         <div class="visual-icon">🔍</div>
@@ -473,7 +473,7 @@
                 <h3>Key Features</h3>
                 <ul>
                     <li><strong>Strong Anonymity:</strong> Votes cannot be linked back to the voter's identity, even if election authorities and credential issuers collude.</li>
-                    <li><strong>Sybil Resistance:</strong> The system prevents a single entity from casting multiple votes through cryptographic authentication.</li>
+                    <li><strong>Sybil Resistance:</strong> The system prevents a single voter from casting multiple votes through cryptographic authentication.</li>
                     <li><strong>Double-Voting Prevention:</strong> Any attempt to vote multiple times is automatically detected and recorded.</li>
                     <li><strong>Distributed Vote Collection:</strong> Multiple vote collectors can operate independently and later combine their results.</li>
                     <li><strong>End-to-End Verification:</strong> The integrity of the voting process can be verified without compromising voter anonymity.</li>
@@ -587,6 +587,7 @@
                     <li>Cannot be linked to the voter's identity</li>
                     <li>Cannot be linked to pseudonyms from other elections</li>
                     <li>Can be verified as belonging to an eligible voter</li>
+                    <li>Can be used to sign data like a digital signature, like your choice in an election</li>
                 </ul>
                 
                 <h3>The Magic of Pseudonyms</h3>
@@ -659,10 +660,10 @@
                     <pre>
 // A simplified representation of how pseudonyms are created
 let pseudonym = credential.pseudonym_for(
-    &params,         // System parameters shared by all participants
+    params,         // System parameters shared by all participants
     election_id,     // Unique identifier for this election
     "vote data",     // Additional data to bind to this pseudonym
-    random_source    // Source of randomness
+    rng    // Source of randomness
 );
 
 // The pseudonym ID is deterministic for a given (credential, election) pair
@@ -834,7 +835,7 @@ if database_valid {
                 <h3>Limitations</h3>
                 <div class="warning">
                     <ul>
-                        <li><strong>Trusted Setup:</strong> The system relies on a trusted credential issuer during the initial setup phase.</li>
+                        <li><strong>Trusted Setup:</strong> The system relies on a trusted credential issuer, as otherwise they can potentially issue arbitrarily many credentials and use them to influence elections.</li>
                         <li><strong>Credential Security:</strong> Voters must keep their private keys secure.</li>
                         <li><strong>No Coercion Resistance:</strong> The current implementation does not address vote buying or coercion.</li>
                         <li><strong>Unaudited:</strong> This library contains experimental cryptography and has not been professionally audited.</li>
