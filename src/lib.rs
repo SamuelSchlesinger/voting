@@ -17,6 +17,7 @@ use std::collections::HashMap;
 pub mod pseudonym;
 
 use bls12_381::Scalar;
+use pairing::group::ff::Field;
 use rand_chacha::ChaCha20Rng;
 use rand_core::{RngCore, OsRng, SeedableRng};
 use pseudonym::{IssuerPublicKey, Params, Pseudonym, Credential};
@@ -62,7 +63,7 @@ impl ElectionID {
     ///
     /// # Example
     /// ```
-    /// use anonymous_voting::ElectionID;
+    /// use voting::ElectionID;
     /// use rand_core::OsRng;
     ///
     /// let election_id = ElectionID::random(OsRng);
@@ -545,21 +546,13 @@ impl VoteDatabase {
 mod tests {
     use super::*;
     use rand_core::OsRng;
-    use bls12_381::Scalar;
-    use pairing::group::ff::Field;
     use crate::pseudonym::{IssuerPrivateKey, ClientPrivateKey, Params};
 
     // Helper function to create a valid election ID
     fn create_election_id() -> ElectionID {
         ElectionID::random(OsRng)
     }
-    
-    // Helper function to create an invalid election ID (all zeros, which is not a valid scalar)
-    fn create_invalid_election_id() -> ElectionID {
-        // The scalar value 0 is not a valid scalar in BLS12-381
-        ElectionID { bytes: [0u8; 32] }
-    }
-    
+     
     // Helper function to setup testing credentials
     fn setup_credentials() -> (Params, IssuerPrivateKey, Credential) {
         let params = Params::default();
@@ -947,7 +940,7 @@ mod tests {
         let (_, _, credential) = setup_credentials();
         
         // Create an election ID with bytes that would represent a value larger than the BLS12-381 field modulus
-        let mut invalid_bytes = [0xFF; 32]; // All ones, definitely greater than modulus
+        let invalid_bytes = [0xFF; 32]; // All ones, definitely greater than modulus
         let election_id = ElectionID { bytes: invalid_bytes };
         let choice = "Candidate A".to_string();
         
