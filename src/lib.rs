@@ -48,6 +48,33 @@ pub struct ElectionID {
     bytes: [u8; 32],
 }
 
+impl ElectionID {
+    /// Creates a new random ElectionID using the provided random number generator.
+    ///
+    /// This generates a cryptographically secure random ElectionID that can be used
+    /// to identify a unique election in the system.
+    ///
+    /// # Arguments
+    /// * `rng` - A random number generator implementing the `RngCore` trait
+    ///
+    /// # Returns
+    /// A new randomly generated `ElectionID`
+    ///
+    /// # Example
+    /// ```
+    /// use anonymous_voting::ElectionID;
+    /// use rand_core::OsRng;
+    ///
+    /// let election_id = ElectionID::random(OsRng);
+    /// ```
+    pub fn random<R: RngCore>(rng: R) -> Self {
+        let scalar = Scalar::random(rng);
+        ElectionID {
+            bytes: scalar.to_bytes(),
+        }
+    }
+}
+
 impl Serialize for Nonce {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -524,8 +551,7 @@ mod tests {
 
     // Helper function to create a valid election ID
     fn create_election_id() -> ElectionID {
-        let scalar = Scalar::random(OsRng);
-        ElectionID { bytes: scalar.to_bytes() }
+        ElectionID::random(OsRng)
     }
     
     // Helper function to create an invalid election ID (all zeros, which is not a valid scalar)

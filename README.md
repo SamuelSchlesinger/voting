@@ -106,6 +106,100 @@ Potential areas for extension include:
 - Threshold cryptography for distributing trust among multiple authorities
 - Integration with decentralized identity systems
 
+## Usage Examples
+
+### Setting Up an Election Authority
+
+```rust
+use anonymous_voting::{pseudonym::{IssuerPrivateKey, Params}, ElectionID, VoteDatabase};
+use rand_core::OsRng;
+
+// Create a new credential issuer (election authority)
+let params = Params::default();
+let issuer_private_key = IssuerPrivateKey::random(OsRng);
+let issuer_public_key = issuer_private_key.public();
+
+// Create a unique election ID
+let election_id = ElectionID::random(OsRng);
+
+// Initialize the vote database and enable the election
+let mut vote_db = VoteDatabase::new();
+vote_db.enable_election(election_id);
+```
+
+### Voter Registration and Voting
+
+```rust
+use anonymous_voting::pseudonym::{ClientPrivateKey, Params};
+use rand_core::OsRng;
+
+// A voter creates their private key and requests a credential
+let client_private_key = ClientPrivateKey::random(OsRng);
+let credreq = client_private_key.request(&params, OsRng);
+
+// The issuer processes the request and returns a response
+let credresp = credreq
+    .respond(&issuer_private_key, &params, OsRng)
+    .unwrap();
+
+// The voter creates their credential using the response
+let credential = client_private_key
+    .create_credential(&credreq, &credresp, &issuer_public_key)
+    .unwrap();
+
+// The voter casts their vote
+let vote = credential
+    .vote(election_id.clone(), "Candidate A".to_string())
+    .unwrap();
+
+// The vote is submitted to the database
+match vote_db.add_vote(vote, &issuer_public_key) {
+    Ok(()) => println!("Vote successfully recorded!"),
+    Err(e) => println!("Error recording vote: {:?}", e),
+}
+```
+
+### Verification and Counting
+
+```rust
+// Verify the integrity of the entire vote database
+if vote_db.verify(&issuer_public_key) {
+    println!("All votes verified as authentic!");
+} else {
+    println!("Vote database verification failed!");
+}
+
+// Count votes for a specific election (simplified example)
+let mut vote_counts = std::collections::HashMap::new();
+if let Some(votes_for_election) = vote_db.votes.get(&election_id) {
+    for (_, vote) in votes_for_election {
+        *vote_counts.entry(vote.choice.clone()).or_insert(0) += 1;
+    }
+}
+
+// Display results
+for (choice, count) in &vote_counts {
+    println!("{}: {} votes", choice, count);
+}
+```
+
+### Distributed Vote Collection
+
+```rust
+// Create a second vote database (e.g., on another server)
+let mut vote_db2 = VoteDatabase::new();
+vote_db2.enable_election(election_id.clone());
+
+// Collect votes in both databases independently
+// ...
+
+// Later, combine the databases
+vote_db.combine(&vote_db2);
+
+// Verify the combined database
+assert!(vote_db.verify(&issuer_public_key));
+```
+
 ## References
 
 - [A Graduate Course in Applied Cryptography by Boneh & Shoup (version 0.6)](https://toc.cryptobook.us/)
