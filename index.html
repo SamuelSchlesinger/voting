@@ -168,7 +168,7 @@
             border-radius: 8px;
             box-shadow: 0 3px 10px var(--shadow);
             text-align: center;
-            max-width: 280px;
+            max-width: 300px;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
         
@@ -481,97 +481,95 @@
                 
                 <h3>System Overview</h3>
                 <div class="svg-container">
-                    <svg viewBox="0 0 800 500" class="svg-element">
+                    <svg viewBox="0 0 800 400" class="svg-element">
                         <!-- Issuer -->
-                        <rect x="50" y="50" width="150" height="80" rx="10" fill="#3498db" opacity="0.8"/>
-                        <text x="125" y="80" text-anchor="middle" fill="white" font-weight="bold">Credential Issuer</text>
-                        <text x="125" y="100" text-anchor="middle" fill="white" font-size="12">Issues anonymous credentials</text>
+                        <rect x="50" y="50" width="180" height="80" rx="10" fill="#3498db" opacity="0.8"/>
+                        <text x="140" y="80" text-anchor="middle" fill="white" font-weight="bold">Credential Issuer</text>
+                        <text x="140" y="100" text-anchor="middle" fill="white" font-size="12">Issues anonymous credentials</text>
                         
                         <!-- Voter -->
-                        <rect x="325" y="50" width="150" height="80" rx="10" fill="#2ecc71" opacity="0.8"/>
-                        <text x="400" y="80" text-anchor="middle" fill="white" font-weight="bold">Voter</text>
-                        <text x="400" y="100" text-anchor="middle" fill="white" font-size="12">Creates pseudonyms & votes</text>
+                        <rect x="325" y="50" width="180" height="80" rx="10" fill="#2ecc71" opacity="0.8"/>
+                        <text x="415" y="80" text-anchor="middle" fill="white" font-weight="bold">Voter</text>
+                        <text x="415" y="100" text-anchor="middle" fill="white" font-size="12">Creates pseudonyms & votes</text>
                         
                         <!-- Multiple Vote Collectors -->
-                        <rect x="560" y="30" width="150" height="60" rx="10" fill="#e74c3c" opacity="0.8"/>
-                        <text x="635" y="55" text-anchor="middle" fill="white" font-weight="bold">Vote Collector 1</text>
-                        <text x="635" y="75" text-anchor="middle" fill="white" font-size="12">Verifies & collects votes</text>
+                        <rect x="600" y="30" width="180" height="60" rx="10" fill="#e74c3c" opacity="0.8"/>
+                        <text x="690" y="55" text-anchor="middle" fill="white" font-weight="bold">Vote Collector 1</text>
+                        <text x="690" y="75" text-anchor="middle" fill="white" font-size="12">Verifies & collects votes</text>
                         
-                        <rect x="560" y="100" width="150" height="60" rx="10" fill="#e74c3c" opacity="0.8"/>
-                        <text x="635" y="125" text-anchor="middle" fill="white" font-weight="bold">Vote Collector 2</text>
-                        <text x="635" y="145" text-anchor="middle" fill="white" font-size="12">Verifies & collects votes</text>
+                        <rect x="600" y="100" width="180" height="60" rx="10" fill="#e74c3c" opacity="0.8"/>
+                        <text x="690" y="125" text-anchor="middle" fill="white" font-weight="bold">Vote Collector 2</text>
+                        <text x="690" y="145" text-anchor="middle" fill="white" font-size="12">Verifies & collects votes</text>
                         
-                        <rect x="560" y="170" width="150" height="60" rx="10" fill="#e74c3c" opacity="0.8"/>
-                        <text x="635" y="195" text-anchor="middle" fill="white" font-weight="bold">Vote Collector 3</text>
-                        <text x="635" y="215" text-anchor="middle" fill="white" font-size="12">Verifies & collects votes</text>
+                        <rect x="600" y="170" width="180" height="60" rx="10" fill="#e74c3c" opacity="0.8"/>
+                        <text x="690" y="195" text-anchor="middle" fill="white" font-weight="bold">Vote Collector 3</text>
+                        <text x="690" y="215" text-anchor="middle" fill="white" font-size="12">Verifies & collects votes</text>
                         
                         <!-- Credentials Flow -->
-                        <line x1="200" y1="90" x2="325" y2="90" stroke="#3498db" stroke-width="3" stroke-dasharray="5,5"/>
+                        <line x1="230" y1="90" x2="325" y2="90" stroke="#3498db" stroke-width="3" stroke-dasharray="5,5"/>
                         <polygon points="315,85 325,90 315,95" fill="#3498db"/>
-                        <text x="262" y="75" text-anchor="middle" fill="#3498db" font-size="12">Credential Issuance</text>
+                        <text x="277" y="75" text-anchor="middle" fill="#3498db" font-size="12">Credential Issuance</text>
                         
                         <!-- Vote Flow to Multiple Collectors -->
-                        <line x1="475" y1="80" x2="560" y2="55" stroke="#2ecc71" stroke-width="3" stroke-dasharray="5,5"/>
-                        <polygon points="550,53 560,55 550,57" fill="#2ecc71"/>
+                        <line x1="505" y1="80" x2="600" y2="55" stroke="#2ecc71" stroke-width="3" stroke-dasharray="5,5"/>
+                        <polygon points="590,53 600,55 590,57" fill="#2ecc71"/>
                         
-                        <line x1="475" y1="90" x2="560" y2="130" stroke="#2ecc71" stroke-width="3" stroke-dasharray="5,5"/>
-                        <polygon points="550,127 560,130 550,133" fill="#2ecc71"/>
+                        <line x1="505" y1="90" x2="600" y2="130" stroke="#2ecc71" stroke-width="3" stroke-dasharray="5,5"/>
+                        <polygon points="590,127 600,130 590,133" fill="#2ecc71"/>
                         
-                        <line x1="475" y1="100" x2="560" y2="190" stroke="#2ecc71" stroke-width="3" stroke-dasharray="5,5"/>
-                        <polygon points="550,187 560,190 550,193" fill="#2ecc71"/>
+                        <line x1="505" y1="100" x2="600" y2="190" stroke="#2ecc71" stroke-width="3" stroke-dasharray="5,5"/>
+                        <polygon points="590,187 600,190 590,193" fill="#2ecc71"/>
                         
-                        <text x="520" y="40" text-anchor="middle" fill="#2ecc71" font-size="12">Vote Casting</text>
+                        <text x="552" y="40" text-anchor="middle" fill="#2ecc71" font-size="12">Vote Casting</text>
                         
-                        <!-- Local Databases -->
-                        <rect x="590" y="250" width="90" height="60" rx="10" fill="#9b59b6" opacity="0.8"/>
-                        <text x="635" y="275" text-anchor="middle" fill="white" font-weight="bold">DB 1</text>
-                        <text x="635" y="295" text-anchor="middle" fill="white" font-size="10">Local votes</text>
+                        <!-- Multiple Public Verifiers -->
+                        <rect x="100" y="260" width="180" height="80" rx="10" fill="#f39c12" opacity="0.8"/>
+                        <text x="190" y="290" text-anchor="middle" fill="white" font-weight="bold">Public Verifier 1</text>
+                        <text x="190" y="310" text-anchor="middle" fill="white" font-size="12">Audits election integrity</text>
+                        <text x="190" y="330" text-anchor="middle" fill="white" font-size="12">without compromising privacy</text>
                         
-                        <rect x="590" y="320" width="90" height="60" rx="10" fill="#9b59b6" opacity="0.8"/>
-                        <text x="635" y="345" text-anchor="middle" fill="white" font-weight="bold">DB 2</text>
-                        <text x="635" y="365" text-anchor="middle" fill="white" font-size="10">Local votes</text>
+                        <rect x="325" y="260" width="180" height="80" rx="10" fill="#f39c12" opacity="0.8"/>
+                        <text x="415" y="290" text-anchor="middle" fill="white" font-weight="bold">Public Verifier 2</text>
+                        <text x="415" y="310" text-anchor="middle" fill="white" font-size="12">Audits election integrity</text>
+                        <text x="415" y="330" text-anchor="middle" fill="white" font-size="12">without compromising privacy</text>
                         
-                        <rect x="590" y="390" width="90" height="60" rx="10" fill="#9b59b6" opacity="0.8"/>
-                        <text x="635" y="415" text-anchor="middle" fill="white" font-weight="bold">DB 3</text>
-                        <text x="635" y="435" text-anchor="middle" fill="white" font-size="10">Local votes</text>
+                        <rect x="550" y="260" width="180" height="80" rx="10" fill="#f39c12" opacity="0.8"/>
+                        <text x="640" y="290" text-anchor="middle" fill="white" font-weight="bold">Public Verifier 3</text>
+                        <text x="640" y="310" text-anchor="middle" fill="white" font-size="12">Audits election integrity</text>
+                        <text x="640" y="330" text-anchor="middle" fill="white" font-size="12">without compromising privacy</text>
                         
-                        <!-- Local DB connections -->
-                        <line x1="635" y1="90" x2="635" y2="250" stroke="#e74c3c" stroke-width="2" stroke-dasharray="5,5"/>
-                        <polygon points="632,240 635,250 638,240" fill="#e74c3c"/>
+                        <!-- Vote Collector to Verifier Arrows with curved paths, all ending at the top of verifiers -->
+                        <!-- First collector to all verifiers -->
+                        <path d="M 690 60 C 500 100 300 150 190 260" stroke="#e74c3c" stroke-width="2.5" stroke-dasharray="5,5" fill="none"/>
+                        <polygon points="195,255 190,260 185,255" fill="#e74c3c"/>
                         
-                        <line x1="635" y1="160" x2="635" y2="320" stroke="#e74c3c" stroke-width="2" stroke-dasharray="5,5"/>
-                        <polygon points="632,310 635,320 638,310" fill="#e74c3c"/>
+                        <path d="M 690 60 C 600 120 500 180 415 260" stroke="#e74c3c" stroke-width="2.5" stroke-dasharray="5,5" fill="none"/>
+                        <polygon points="420,255 415,260 410,255" fill="#e74c3c"/>
                         
-                        <line x1="635" y1="230" x2="635" y2="390" stroke="#e74c3c" stroke-width="2" stroke-dasharray="5,5"/>
-                        <polygon points="632,380 635,390 638,380" fill="#e74c3c"/>
+                        <path d="M 690 60 C 720 120 700 180 640 260" stroke="#e74c3c" stroke-width="2.5" stroke-dasharray="5,5" fill="none"/>
+                        <polygon points="645,255 640,260 635,255" fill="#e74c3c"/>
                         
-                        <!-- Combined Database -->
-                        <rect x="325" y="325" width="150" height="90" rx="10" fill="#9b59b6" opacity="0.8"/>
-                        <text x="400" y="355" text-anchor="middle" fill="white" font-weight="bold">Combined Database</text>
-                        <text x="400" y="375" text-anchor="middle" fill="white" font-size="12">Merges all vote collectors'</text>
-                        <text x="400" y="395" text-anchor="middle" fill="white" font-size="12">databases & detects conflicts</text>
+                        <!-- Second collector to all verifiers -->
+                        <path d="M 690 130 C 470 140 300 170 170 260" stroke="#e74c3c" stroke-width="2.5" stroke-dasharray="5,5" fill="none"/>
+                        <polygon points="175,255 170,260 165,255" fill="#e74c3c"/>
                         
-                        <!-- Combining arrows -->
-                        <line x1="590" y1="280" x2="475" y2="340" stroke="#9b59b6" stroke-width="3" stroke-dasharray="5,5"/>
-                        <polygon points="485,337 475,340 480,330" fill="#9b59b6"/>
+                        <path d="M 690 130 C 570 150 450 190 395 260" stroke="#e74c3c" stroke-width="2.5" stroke-dasharray="5,5" fill="none"/>
+                        <polygon points="400,255 395,260 390,255" fill="#e74c3c"/>
                         
-                        <line x1="590" y1="350" x2="475" y2="350" stroke="#9b59b6" stroke-width="3" stroke-dasharray="5,5"/>
-                        <polygon points="485,347 475,350 485,353" fill="#9b59b6"/>
+                        <path d="M 690 130 C 750 160 700 200 620 260" stroke="#e74c3c" stroke-width="2.5" stroke-dasharray="5,5" fill="none"/>
+                        <polygon points="625,255 620,260 615,255" fill="#e74c3c"/>
                         
-                        <line x1="590" y1="420" x2="475" y2="360" stroke="#9b59b6" stroke-width="3" stroke-dasharray="5,5"/>
-                        <polygon points="485,363 475,360 480,370" fill="#9b59b6"/>
+                        <!-- Third collector to all verifiers -->
+                        <path d="M 690 200 C 450 180 250 190 150 260" stroke="#e74c3c" stroke-width="2.5" stroke-dasharray="5,5" fill="none"/>
+                        <polygon points="155,255 150,260 145,255" fill="#e74c3c"/>
                         
-                        <text x="533" y="315" text-anchor="middle" fill="#9b59b6" font-size="12">Combine</text>
+                        <path d="M 690 200 C 550 190 430 200 375 260" stroke="#e74c3c" stroke-width="2.5" stroke-dasharray="5,5" fill="none"/>
+                        <polygon points="380,255 375,260 370,255" fill="#e74c3c"/>
                         
-                        <!-- Public Verification -->
-                        <rect x="100" y="325" width="150" height="90" rx="10" fill="#f39c12" opacity="0.8"/>
-                        <text x="175" y="355" text-anchor="middle" fill="white" font-weight="bold">Public Verifier</text>
-                        <text x="175" y="375" text-anchor="middle" fill="white" font-size="12">Audits election integrity</text>
-                        <text x="175" y="395" text-anchor="middle" fill="white" font-size="12">without compromising privacy</text>
+                        <path d="M 690 200 C 720 210 660 220 600 260" stroke="#e74c3c" stroke-width="2.5" stroke-dasharray="5,5" fill="none"/>
+                        <polygon points="605,255 600,260 595,255" fill="#e74c3c"/>
                         
-                        <line x1="325" y1="370" x2="250" y2="370" stroke="#9b59b6" stroke-width="3" stroke-dasharray="5,5"/>
-                        <polygon points="260,367 250,370 260,373" fill="#9b59b6"/>
-                        <text x="290" y="395" text-anchor="middle" fill="#9b59b6" font-size="12">Public Access</text>
+                        <text x="400" y="230" text-anchor="middle" fill="#e74c3c" font-size="14" font-weight="bold">Merge and Verify</text>
                     </svg>
                 </div>
             </div>
@@ -595,56 +593,56 @@
                 <div class="svg-container">
                     <svg viewBox="0 0 800 300" class="svg-element">
                         <!-- Voter -->
-                        <rect x="100" y="50" width="120" height="60" rx="8" fill="#2ecc71" opacity="0.8"/>
-                        <text x="160" y="75" text-anchor="middle" fill="white" font-weight="bold">Voter</text>
-                        <text x="160" y="95" text-anchor="middle" fill="white" font-size="12">Private Key (k)</text>
+                        <rect x="50" y="50" width="150" height="60" rx="8" fill="#2ecc71" opacity="0.8"/>
+                        <text x="125" y="75" text-anchor="middle" fill="white" font-weight="bold">Voter</text>
+                        <text x="125" y="95" text-anchor="middle" fill="white" font-size="12">Private Key (k)</text>
                         
                         <!-- Credential -->
-                        <rect x="340" y="50" width="120" height="60" rx="8" fill="#3498db" opacity="0.8"/>
-                        <text x="400" y="75" text-anchor="middle" fill="white" font-weight="bold">Credential</text>
-                        <text x="400" y="95" text-anchor="middle" fill="white" font-size="12">(a, e, k)</text>
+                        <rect x="300" y="50" width="150" height="60" rx="8" fill="#3498db" opacity="0.8"/>
+                        <text x="375" y="75" text-anchor="middle" fill="white" font-weight="bold">Credential</text>
+                        <text x="375" y="95" text-anchor="middle" fill="white" font-size="12">(a, e, k)</text>
                         
                         <!-- Arrow -->
-                        <line x1="220" y1="80" x2="340" y2="80" stroke="#2c3e50" stroke-width="2"/>
-                        <polygon points="330,75 340,80 330,85" fill="#2c3e50"/>
-                        <text x="280" y="65" text-anchor="middle" fill="#2c3e50" font-size="12">Receives</text>
+                        <line x1="200" y1="80" x2="300" y2="80" stroke="#2c3e50" stroke-width="2"/>
+                        <polygon points="290,75 300,80 290,85" fill="#2c3e50"/>
+                        <text x="250" y="65" text-anchor="middle" fill="#2c3e50" font-size="12">Receives</text>
                         
                         <!-- Election 1 -->
-                        <rect x="550" y="20" width="180" height="50" rx="8" fill="#e74c3c" opacity="0.8"/>
-                        <text x="640" y="45" text-anchor="middle" fill="white" font-weight="bold">Election 1 Pseudonym</text>
-                        <text x="640" y="65" text-anchor="middle" fill="white" font-size="12">(deterministic)</text>
+                        <rect x="550" y="20" width="200" height="50" rx="8" fill="#e74c3c" opacity="0.8"/>
+                        <text x="650" y="45" text-anchor="middle" fill="white" font-weight="bold">Election 1 Pseudonym</text>
+                        <text x="650" y="65" text-anchor="middle" fill="white" font-size="12">(deterministic)</text>
                         
                         <!-- Election 2 -->
-                        <rect x="550" y="90" width="180" height="50" rx="8" fill="#e74c3c" opacity="0.8"/>
-                        <text x="640" y="115" text-anchor="middle" fill="white" font-weight="bold">Election 2 Pseudonym</text>
-                        <text x="640" y="135" text-anchor="middle" fill="white" font-size="12">(different ID)</text>
+                        <rect x="550" y="90" width="200" height="50" rx="8" fill="#e74c3c" opacity="0.8"/>
+                        <text x="650" y="115" text-anchor="middle" fill="white" font-weight="bold">Election 2 Pseudonym</text>
+                        <text x="650" y="135" text-anchor="middle" fill="white" font-size="12">(different ID)</text>
                         
                         <!-- Arrow 1 -->
-                        <line x1="460" y1="60" x2="550" y2="45" stroke="#3498db" stroke-width="2"/>
+                        <line x1="450" y1="60" x2="550" y2="45" stroke="#3498db" stroke-width="2"/>
                         <polygon points="540,43 550,45 545,52" fill="#3498db"/>
                         
                         <!-- Arrow 2 -->
-                        <line x1="460" y1="90" x2="550" y2="115" stroke="#3498db" stroke-width="2"/>
+                        <line x1="450" y1="90" x2="550" y2="115" stroke="#3498db" stroke-width="2"/>
                         <polygon points="540,112 550,115 542,120" fill="#3498db"/>
                         
                         <!-- Attempt Double Vote -->
-                        <rect x="340" y="170" width="120" height="60" rx="8" fill="#f39c12" opacity="0.8"/>
-                        <text x="400" y="195" text-anchor="middle" fill="white" font-weight="bold">Attempt</text>
-                        <text x="400" y="215" text-anchor="middle" fill="white" font-size="12">Double Vote</text>
+                        <rect x="300" y="170" width="150" height="60" rx="8" fill="#f39c12" opacity="0.8"/>
+                        <text x="375" y="195" text-anchor="middle" fill="white" font-weight="bold">Attempt</text>
+                        <text x="375" y="215" text-anchor="middle" fill="white" font-size="12">Double Vote</text>
                         
                         <!-- Double Vote Result -->
-                        <rect x="550" y="170" width="180" height="60" rx="8" fill="#8e44ad" opacity="0.8"/>
-                        <text x="640" y="195" text-anchor="middle" fill="white" font-weight="bold">Same Pseudonym ID</text>
-                        <text x="640" y="215" text-anchor="middle" fill="white" font-size="12">(Double Vote Detected)</text>
+                        <rect x="550" y="170" width="200" height="60" rx="8" fill="#8e44ad" opacity="0.8"/>
+                        <text x="650" y="195" text-anchor="middle" fill="white" font-weight="bold">Same Pseudonym ID</text>
+                        <text x="650" y="215" text-anchor="middle" fill="white" font-size="12">(Double Vote Detected)</text>
                         
                         <!-- Arrow -->
-                        <line x1="460" y1="200" x2="550" y2="200" stroke="#f39c12" stroke-width="2"/>
+                        <line x1="450" y1="200" x2="550" y2="200" stroke="#f39c12" stroke-width="2"/>
                         <polygon points="540,195 550,200 540,205" fill="#f39c12"/>
                         
                         <!-- Label for derivation with straight lines -->
-                        <line x1="480" y1="80" x2="520" y2="80" stroke="#2c3e50" stroke-width="2"/>
-                        <text x="500" y="100" text-anchor="middle" fill="#2c3e50" font-size="12">Derives</text>
-                        <text x="500" y="120" text-anchor="middle" fill="#2c3e50" font-size="12">Pseudonyms</text>
+                        <line x1="470" y1="80" x2="520" y2="80" stroke="#2c3e50" stroke-width="2"/>
+                        <text x="495" y="100" text-anchor="middle" fill="#2c3e50" font-size="12">Derives</text>
+                        <text x="495" y="120" text-anchor="middle" fill="#2c3e50" font-size="12">Pseudonyms</text>
                     </svg>
                 </div>
                 
@@ -686,22 +684,22 @@ let pseudonym = credential.pseudonym_for(
                 <div class="flow-container">
                     <div class="flow-arrow"></div>
                     <div class="flow-stage">
-                        <div class="flow-step">
+                        <div class="flow-step" style="max-width: 300px;">
                             <h3>Setup</h3>
                             <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MCIgaGVpZ2h0PSI4MCIgdmlld0JveD0iMCAwIDgwIDgwIiBmaWxsPSJub25lIj48Y2lyY2xlIGN4PSI0MCIgY3k9IjQwIiByPSIzNiIgc3Ryb2tlPSIjMzQ5OGRiIiBzdHJva2Utd2lkdGg9IjQiLz48cGF0aCBkPSJNMjUgNDBMMzUgNTBMNTUgMzAiIHN0cm9rZT0iIzM0OThkYiIgc3Ryb2tlLXdpZHRoPSI0IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48L3N2Zz4=" alt="Setup">
                             <p>Issuer generates key pair and publishes public key. System parameters are established.</p>
                         </div>
-                        <div class="flow-step">
+                        <div class="flow-step" style="max-width: 300px;">
                             <h3>Credential Request</h3>
                             <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MCIgaGVpZ2h0PSI4MCIgdmlld0JveD0iMCAwIDgwIDgwIiBmaWxsPSJub25lIj48Y2lyY2xlIGN4PSI0MCIgY3k9IjQwIiByPSIzNiIgc3Ryb2tlPSIjMmVjYzcxIiBzdHJva2Utd2lkdGg9IjQiLz48cGF0aCBkPSJNMjggMzVINTIiIHN0cm9rZT0iIzJlY2M3MSIgc3Ryb2tlLXdpZHRoPSI0IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48cGF0aCBkPSJNMjggNDVINTIiIHN0cm9rZT0iIzJlY2M3MSIgc3Ryb2tlLXdpZHRoPSI0IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48cGF0aCBkPSJNMjggNTVINDIiIHN0cm9rZT0iIzJlY2M3MSIgc3Ryb2tlLXdpZHRoPSI0IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48L3N2Zz4=" alt="Credential Request">
                             <p>Voter generates private key and sends a credential request to the issuer.</p>
                         </div>
-                        <div class="flow-step">
+                        <div class="flow-step" style="max-width: 300px;">
                             <h3>Credential Issuance</h3>
                             <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MCIgaGVpZ2h0PSI4MCIgdmlld0JveD0iMCAwIDgwIDgwIiBmaWxsPSJub25lIj48Y2lyY2xlIGN4PSI0MCIgY3k9IjQwIiByPSIzNiIgc3Ryb2tlPSIjOWI1OWI2IiBzdHJva2Utd2lkdGg9IjQiLz48cGF0aCBkPSJNNDAgMjBWNDAiIHN0cm9rZT0iIzliNTliNiIgc3Ryb2tlLXdpZHRoPSI0IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48cGF0aCBkPSJNNDAgNjBWNjAuMDEiIHN0cm9rZT0iIzliNTliNiIgc3Ryb2tlLXdpZHRoPSI0IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48L3N2Zz4=" alt="Credential Issuance">
                             <p>Issuer verifies the request and issues a credential without learning the voter's private key.</p>
                         </div>
-                        <div class="flow-step">
+                        <div class="flow-step" style="max-width: 300px;">
                             <h3>Election Setup</h3>
                             <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MCIgaGVpZ2h0PSI4MCIgdmlld0JveD0iMCAwIDgwIDgwIiBmaWxsPSJub25lIj48Y2lyY2xlIGN4PSI0MCIgY3k9IjQwIiByPSIzNiIgc3Ryb2tlPSIjZTc0YzNjIiBzdHJva2Utd2lkdGg9IjQiLz48cGF0aCBkPSJNMjcgNDZMNDAgMzNMNTMgNDYiIHN0cm9rZT0iI2U3NGMzYyIgc3Ryb2tlLXdpZHRoPSI0IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48L3N2Zz4=" alt="Election Setup">
                             <p>Vote collector creates a new election with a unique ID and enables it in the database.</p>
@@ -712,25 +710,25 @@ let pseudonym = credential.pseudonym_for(
                 <div class="flow-container">
                     <div class="flow-arrow"></div>
                     <div class="flow-stage">
-                        <div class="flow-step">
+                        <div class="flow-step" style="max-width: 300px;">
                             <h3>Create Pseudonym</h3>
                             <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MCIgaGVpZ2h0PSI4MCIgdmlld0JveD0iMCAwIDgwIDgwIiBmaWxsPSJub25lIj48Y2lyY2xlIGN4PSI0MCIgY3k9IjQwIiByPSIzNiIgc3Ryb2tlPSIjZjM5YzEyIiBzdHJva2Utd2lkdGg9IjQiLz48cGF0aCBkPSJNMjUgMzBDMjUgMzAgMzMgNDQgNDAgNDRDNDcgNDQgNTUgMzAgNTUgMzAiIHN0cm9rZT0iI2YzOWMxMiIgc3Ryb2tlLXdpZHRoPSI0IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48Y2lyY2xlIGN4PSI0MCIgY3k9IjU1IiByPSI2IiBmaWxsPSIjZjM5YzEyIi8+PC9zdmc+" alt="Create Pseudonym">
                             <p>Voter derives a pseudonym specific to the election using their credential.</p>
                         </div>
-                        <div class="flow-step">
+                        <div class="flow-step" style="max-width: 300px;">
                             <h3>Cast Vote</h3>
                             <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MCIgaGVpZ2h0PSI4MCIgdmlld0JveD0iMCAwIDgwIDgwIiBmaWxsPSJub25lIj48cmVjdCB4PSIyMCIgeT0iMjAiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgcng9IjQiIHN0cm9rZT0iIzM0OThkYiIgc3Ryb2tlLXdpZHRoPSI0Ii8+PHBhdGggZD0iTTMwIDQwTDM3IDQ3TDUwIDM0IiBzdHJva2U9IiMzNDk4ZGIiIHN0cm9rZS13aWR0aD0iNCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PC9zdmc+" alt="Cast Vote">
                             <p>Voter creates a vote with their choice and pseudonym as proof of eligibility.</p>
                         </div>
-                        <div class="flow-step">
+                        <div class="flow-step" style="max-width: 300px;">
                             <h3>Vote Verification</h3>
                             <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MCIgaGVpZ2h0PSI4MCIgdmlld0JveD0iMCAwIDgwIDgwIiBmaWxsPSJub25lIj48Y2lyY2xlIGN4PSI0MCIgY3k9IjQwIiByPSIzNiIgc3Ryb2tlPSIjOGU0NGFkIiBzdHJva2Utd2lkdGg9IjQiLz48cGF0aCBkPSJNNDAgMjBWMzAiIHN0cm9rZT0iIzhlNDRhZCIgc3Ryb2tlLXdpZHRoPSI0IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48cGF0aCBkPSJNNDAgNTBWNjAiIHN0cm9rZT0iIzhlNDRhZCIgc3Ryb2tlLXdpZHRoPSI0IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48cGF0aCBkPSJNMjAgNDBIMzAiIHN0cm9rZT0iIzhlNDRhZCIgc3Ryb2tlLXdpZHRoPSI0IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48cGF0aCBkPSJNNTAgNDBINjAiIHN0cm9rZT0iIzhlNDRhZCIgc3Ryb2tlLXdpZHRoPSI0IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48cGF0aCBkPSJNMjYgMjZMMzQgMzQiIHN0cm9rZT0iIzhlNDRhZCIgc3Ryb2tlLXdpZHRoPSI0IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48cGF0aCBkPSJNNDYgNDZMNTQgNTQiIHN0cm9rZT0iIzhlNDRhZCIgc3Ryb2tlLXdpZHRoPSI0IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48cGF0aCBkPSJNMjYgNTRMMzQgNDYiIHN0cm9rZT0iIzhlNDRhZCIgc3Ryb2tlLXdpZHRoPSI0IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48cGF0aCBkPSJNNDYgMzRMNTQgMjYiIHN0cm9rZT0iIzhlNDRhZCIgc3Ryb2tlLXdpZHRoPSI0IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48L3N2Zz4=" alt="Vote Verification">
                             <p>Vote collector verifies the vote's authenticity using the issuer's public key.</p>
                         </div>
-                        <div class="flow-step">
+                        <div class="flow-step" style="max-width: 300px;">
                             <h3>Recording & Results</h3>
                             <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MCIgaGVpZ2h0PSI4MCIgdmlld0JveD0iMCAwIDgwIDgwIiBmaWxsPSJub25lIj48cmVjdCB4PSIyMCIgeT0iMjAiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgcng9IjQiIHN0cm9rZT0iIzJlY2M3MSIgc3Ryb2tlLXdpZHRoPSI0Ii8+PHBhdGggZD0iTTMwIDM1SDUwIiBzdHJva2U9IiMyZWNjNzEiIHN0cm9rZS13aWR0aD0iNCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PHBhdGggZD0iTTMwIDQ1SDUwIiBzdHJva2U9IiMyZWNjNzEiIHN0cm9rZS13aWR0aD0iNCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PC9zdmc+" alt="Recording & Results">
-                            <p>Vote is recorded in the database and counted in the final results.</p>
+                            <p>Vote is recorded and counted in the final results.</p>
                         </div>
                     </div>
                 </div>
@@ -773,37 +771,37 @@ match result {
                 <div class="svg-container">
                     <svg viewBox="0 0 800 240" class="svg-element">
                         <!-- Vote 1 -->
-                        <rect x="50" y="50" width="150" height="80" rx="8" fill="#2ecc71" opacity="0.8"/>
-                        <text x="125" y="80" text-anchor="middle" fill="white" font-weight="bold">Vote 1</text>
-                        <text x="125" y="100" text-anchor="middle" fill="white" font-size="12">Pseudonym ID: ABC123</text>
-                        <text x="125" y="120" text-anchor="middle" fill="white" font-size="12">Choice: "Yes"</text>
+                        <rect x="50" y="50" width="180" height="80" rx="8" fill="#2ecc71" opacity="0.8"/>
+                        <text x="140" y="80" text-anchor="middle" fill="white" font-weight="bold">Vote 1</text>
+                        <text x="140" y="100" text-anchor="middle" fill="white" font-size="12">Pseudonym ID: ABC123</text>
+                        <text x="140" y="120" text-anchor="middle" fill="white" font-size="12">Choice: "Yes"</text>
                         
                         <!-- Vote 2 -->
-                        <rect x="50" y="150" width="150" height="80" rx="8" fill="#e74c3c" opacity="0.8"/>
-                        <text x="125" y="180" text-anchor="middle" fill="white" font-weight="bold">Vote 2</text>
-                        <text x="125" y="200" text-anchor="middle" fill="white" font-size="12">Pseudonym ID: ABC123</text>
-                        <text x="125" y="220" text-anchor="middle" fill="white" font-size="12">Choice: "No"</text>
+                        <rect x="50" y="150" width="180" height="80" rx="8" fill="#e74c3c" opacity="0.8"/>
+                        <text x="140" y="180" text-anchor="middle" fill="white" font-weight="bold">Vote 2</text>
+                        <text x="140" y="200" text-anchor="middle" fill="white" font-size="12">Pseudonym ID: ABC123</text>
+                        <text x="140" y="220" text-anchor="middle" fill="white" font-size="12">Choice: "No"</text>
                         
                         <!-- Database -->
-                        <rect x="400" y="40" width="350" height="180" rx="8" fill="#3498db" opacity="0.8"/>
-                        <text x="575" y="70" text-anchor="middle" fill="white" font-weight="bold">Vote Database</text>
+                        <rect x="380" y="40" width="370" height="180" rx="8" fill="#3498db" opacity="0.8"/>
+                        <text x="565" y="70" text-anchor="middle" fill="white" font-weight="bold">Vote Database</text>
                         
                         <!-- Vote Table -->
-                        <rect x="425" y="90" width="300" height="40" rx="4" fill="white" opacity="0.9"/>
+                        <rect x="405" y="90" width="320" height="40" rx="4" fill="white" opacity="0.9"/>
                         <text x="450" y="115" font-size="12">Pseudonym ID: ABC123</text>
                         <text x="650" y="115" font-size="12">Choice: "Yes"</text>
                         
                         <!-- Liar Table -->
-                        <rect x="425" y="150" width="300" height="40" rx="4" fill="#f39c12" opacity="0.9"/>
-                        <text x="575" y="175" text-anchor="middle" font-size="12" font-weight="bold">Double Vote Detected: ABC123</text>
+                        <rect x="405" y="150" width="320" height="40" rx="4" fill="#f39c12" opacity="0.9"/>
+                        <text x="565" y="175" text-anchor="middle" font-size="12" font-weight="bold">Double Vote Detected: ABC123</text>
                         
                         <!-- Arrows -->
-                        <line x1="200" y1="90" x2="400" y2="110" stroke="#2ecc71" stroke-width="2"/>
-                        <polygon points="390,107 400,110 390,113" fill="#2ecc71"/>
+                        <line x1="230" y1="90" x2="380" y2="110" stroke="#2ecc71" stroke-width="2"/>
+                        <polygon points="370,107 380,110 370,113" fill="#2ecc71"/>
                         <text x="300" y="90" text-anchor="middle" fill="#2ecc71" font-size="12">Accepted</text>
                         
-                        <line x1="200" y1="180" x2="400" y2="170" stroke="#e74c3c" stroke-width="2"/>
-                        <polygon points="390,167 400,170 390,173" fill="#e74c3c"/>
+                        <line x1="230" y1="180" x2="380" y2="170" stroke="#e74c3c" stroke-width="2"/>
+                        <polygon points="370,167 380,170 370,173" fill="#e74c3c"/>
                         <text x="300" y="190" text-anchor="middle" fill="#e74c3c" font-size="12">Rejected</text>
                     </svg>
                 </div>
