@@ -8,6 +8,29 @@ For example, a government could issue credentials to individuals based on their
 identity documents. As another example, a company could issue credentials based
 on their membership in the firm.
 
+## Just Some Server
+
+For some friends who want to deploy anonymous voting for their use cases, just
+some random server is a totally reasonable way to deploy this system. In
+particular, just have someone you trust set up a server which collects and
+verifies votes. If users feel extra paranoid about the server actually
+capturing and recording who voted for what via fingerprinting of some sort,
+then they can connect to the server via a VPN.
+
+If you want to get fancy, OHTTP might be a useful thing. I need to learn more
+about this.
+
+## Trusted Execution Environment
+
+This is a great use case for a Trusted Execution Environment. In particular,
+we can deploy a single vote collector in a Trusted Execution Environment that
+only permits votes to be cast up to a certain time, and after that time allows
+arbitrary clients to query the vote set.
+
+However, it is important to note that such a system has another root of trust,
+the hardware provider. In a use case such as governmental elections, this root
+of trust might not be appropriate.
+
 ## Blockchain
 
 This is probably the most straightforward deployment option. Essentially, you
@@ -26,7 +49,7 @@ elections, this should strongly be taken into account. However, for a small
 group holding anonymous elections on some mostly irrelevant thing to the nodes,
 it seems like this is a perfectly appropriate deployment pattern.
 
-## Bespoke Approach
+## Decentralized Approach
 
 Another approach is to build a bespoke system to solve this problem. This is
 much harder, and requires careful thought to avoid issues such as:
